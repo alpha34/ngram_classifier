@@ -2,7 +2,9 @@
 Created on Sep 14, 2015
 @author: uday
 classifies data using random forest & svm after computing ngram frequency vectors for sequences
+input=fasta files of dna sequences
 '''
+
 from Bio import SeqIO
 from itertools import product
 import sys
