@@ -1,13 +1,13 @@
 '''
 Created on Sep 14, 2015
 @author: uday
-classifies data using random forest, svm, after computing ngram frequency vectors for sequences
+classifies data using random forest & svm after computing ngram frequency vectors for sequences
 '''
 from Bio import SeqIO
 from itertools import product
 import sys
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.cross_validation import cross_val_score
+from sklearn.cross_validation import cross_val_score, train_test_split
 from sklearn.svm import SVC
 from numpy import array, ones, zeros, concatenate
 
@@ -51,27 +51,41 @@ def compute_frequency_matrix(n, sequences):
     return matrix
 
 def random_forest(data, labels, n_estimators):
-    rfc = RandomForestClassifier(n_estimators=n_estimators,verbose=10)
-    rfc.fit(data, labels)
+    rfc = RandomForestClassifier(n_estimators=n_estimators,verbose=0)
     return rfc
 
-def svm(data, labels):
-    svm = SVC()
-    svm.fit(data, labels)
+def perform_svm(data, labels, C):
+    svm = SVC(kernel='linear', C=C)
     return svm
+
+def test(model, data, labels, test_size):
+    train_data, test_data, train_labels, test_labels =  train_test_split(data, labels, test_size=test_size)
+    model.fit(train_data, train_labels)
+    accuracy=model.score(test_data, test_labels)
+    print("mean accuracy: %0.2f " % accuracy)
     
 def cross_validate(rfc,data,labels):
-    scores = cross_val_score(rfc,data,labels,cv=10,verbose=10)
+    scores = cross_val_score(rfc,data,labels,cv=10,verbose=0)
     print("Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std()*2))    
+
+def predict(model, test_data):
+    predictions=model.predict(test_data)
+    print(predictions)
 
 def get_sequences(fasta_file):
     sequences = [x.seq for x in SeqIO.parse(fasta_file, "fasta")]
     return sequences
-    
+
+def run(data, labels):
+    print("results from RF")
+    rfc=random_forest(data, labels, 50)
+    test(rfc,data,labels,0.2)
+    print("results from SVM")
+    this_svm = perform_svm(data, labels, 1)
+    test(this_svm,data,labels,0.2)
+
 if __name__ == '__main__':
     sequences1 = get_sequences(sys.argv[1])
-    print(sequences1[0])
-    print(sequences1[-1])
     sequences2 = get_sequences(sys.argv[2])
     matrix1 = compute_frequency_matrix(3, sequences1)
     matrix2 = compute_frequency_matrix(3, sequences2)
@@ -81,15 +95,10 @@ if __name__ == '__main__':
     zeros = zeros(len2)
     data=concatenate([matrix1,matrix2])
     labels=concatenate([ones,zeros])
-    rfc=random_forest(data, labels, 50)
-    cross_validate(rfc, data, labels)
+    run(data,labels)
     
-    svm = svm(data, labels)
-    cross_validate(svm, data, labels)
-    #sequences3 = get_sequences(sys.argv[3])
-    #test_data = compute_frequency_matrix(3, sequences3)
-    #predictions=rfc.predict(test_data)
-    #print(predictions)
+
+
     
     
     
