@@ -5,6 +5,7 @@ classifies data using random forest & svm after computing ngram frequency vector
 input=fasta files of dna sequences
 '''
 
+import os
 from Bio import SeqIO
 from itertools import product
 import sys
@@ -18,7 +19,7 @@ import matplotlib.cm as cm
 from sklearn.neighbors import KNeighborsClassifier
 from difflib import SequenceMatcher
 from sklearn.metrics import roc_curve, auc
-from openpyxl import datavalidation
+import csv
 
 #use biopython SeqIO to parse fasta file
 #returns a list of sequences
@@ -88,8 +89,8 @@ def compute_frequency_matrix(n, sequences):
     for sequence in sequences:
         if len(sequence)>0:
             ngram_frequencies=calculate_ngram_frequencies(n, sequence)
-        frequencies= ngram_frequencies.values()
-        matrix.append(frequencies)
+            frequencies= ngram_frequencies.values()
+            matrix.append(frequencies)
     matrix = array([list(z) for z in matrix]).tolist()
     return matrix
 
@@ -157,13 +158,23 @@ def run(data, labels, data_type):
     test(knn,data,labels,0.2,data_type,'KNN','blue')
     cross_validate(knn,data,labels)
     plt.legend(loc='lower right')
-    plt.show()
+    #plt.show()
+    save_plot(plt, 'C:\\uday\\gmu\\ngrams\\jan_2016_results\\', data_type)
 
-#pipeline
-if __name__ == '__main__':
-    sequences1 = get_sequences(sys.argv[1])
-    sequences2 = get_sequences(sys.argv[2])
-    data_type=sys.argv[3]
+def save_plot(plt, directory, file, ext='png'):
+    # If the directory does not exist, create it
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    filename = "%s.%s" % (file, ext)
+    # The final path to save to
+    savepath = os.path.join(directory, file)
+    print("Saving figure to '%s'..." % savepath),
+
+    # Actually save the figure
+    plt.savefig(savepath)
+    plt.close()
+    
+def create_data(sequences1, sequences2):
     print("size of data before duplicate check", len(sequences1), len(sequences2))
     sequences1 = remove_duplicates(sequences1)
     sequences2 = remove_duplicates(sequences2)
@@ -175,8 +186,34 @@ if __name__ == '__main__':
     matrix2 = compute_frequency_matrix(3, sequences2)
     len1 = len(matrix1)
     len2 = len(matrix2)
-    ones = ones(len1)
-    zeros = zeros(len2)
+    one_s = ones(len1)
+    zero_s = zeros(len2)
     data=concatenate([matrix1,matrix2])
-    labels=concatenate([ones,zeros])
-    run(data,labels,data_type)
+    labels=concatenate([one_s,zero_s])
+    return data, labels
+    
+def get_data_from_files(file1, file2):
+    # 2012, 2014
+    sequences1 = get_sequences(file1)
+    sequences2 = get_sequences(file2)
+    data, labels = create_data(sequences1, sequences2)
+    return data, labels    
+
+def readFile(filename):
+    f = open(filename)
+    csv_f = csv.reader(f)
+    return csv_f
+    
+#pipeline
+if __name__ == '__main__':
+    input_file = sys.argv[1]
+    sys.stdout = open("C:\\uday\\gmu\\ngrams\\jan_2016_results\\ngrams_results.txt", "w")
+    lines = readFile(input_file)
+    for line in lines:
+        print("start processing ",line)
+        file1=line[0]
+        file2=line[1]
+        analysis_type=line[2]
+        data, labels = get_data_from_files(file1, file2)
+        run(data,labels,analysis_type)
+        print("done processing ",line)
