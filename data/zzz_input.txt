@@ -1,0 +1,16 @@
+2012_usa_ha_400.fasta,2014_usa_ha_400.fasta,2012_2014_HA
+2012_usa_na_400.fasta,2014_usa_na_400.fasta,2012_2014_NA
+2012_usa_m_400.fasta,2014_usa_m_400.fasta,2012_2014_M
+2005_ha_400.fasta,2003_ha_400.fasta,2005_2003_HA
+2005_na_400.fasta,2003_na_400.fasta,2005_2003_NA
+2005_m_400.fasta,2003_m_400.fasta,2005_2003_M
+asia_2014_ha_400.fasta,usa_2014_ha_400.fasta,china_us_ha_2014
+asia_2014_na_400.fasta,usa_2014_na_400.fasta,china_us_na_2014
+h1n1_2014_na_400.fasta,h3n2_2014_na_400.fasta,h1n1_h3n2_na_2014
+h1n1_2014_ha_400.fasta,h3n2_2014_ha_400.fasta,h1n1_h3n2_ha_2014
+h1n1_2014_m_381.fasta,h3n2_2014_m_400.fasta,h1n1_h3n2_m_2014
+ph1n1_neg_2009_ha_400.fasta,ph1n1_pos_2009_ha_400.fasta,ph1n1_ha_positive_negative
+ph1n1_neg_2009_na_400.fasta,ph1n1_pos_2009_na_400.fasta,ph1n1_na_positive_negative
+ad_res_os_sen_ha_468.fasta,ad_sen_os_res_ha_233.fasta,ad_os_res_sen_ha
+ad_res_os_sen_m_393.fasta,ad_sen_os_res_m_221.fasta,ad_os_res_sen_m
+ad_res_os_sen_na_463.fasta,ad_sen_os_res_na_236.fasta,ad_os_res_sen_na
