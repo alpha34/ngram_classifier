@@ -5,5 +5,5 @@ ngrams based classification of flu sequences
 still in a "development phase"  
 
 # functionality
-classifies dna sequences using ngram frequencies  
+classifies dna and protein sequences using ngram frequencies  
 uses scikit learn svm/rf/naive-bayes/k-nn for classification
