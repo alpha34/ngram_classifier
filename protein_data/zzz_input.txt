@@ -1,0 +1,29 @@
+flu_season/p_13_14_usa_ha_418.fasta,flu_season/p_14_15_usa_ha_543.fasta,flu season 2013-14 vs 2014-15,ha
+flu_season/p_13_14_usa_na_317.fasta,flu_season/p_14_15_usa_na_338.fasta,flu season 2013-14 vs 2014-15,na
+flu_season/p_13_14_all_pa_98.fasta,flu_season/p_14_15_all_pa_100.fasta,flu season 2013-14 vs 2014-15,pa
+
+sub_type/p_h1n1_2012_to_2016_ha_500.fasta,sub_type/p_h3n2_2012_to_2016_ha_500.fasta,subtype h1n1 vs h3n2,ha
+sub_type/p_h1n1_2012_to_2016_na_486.fasta,sub_type/p_h3n2_2012_to_2016_na_500.fasta,subtype h1n1 vs h3n2,na
+sub_type/p_h1n1_all_years_400_m1.fasta,sub_type/p_h3n2_all_years_365_m1.fasta,subtype h1n1 vs h3n2,m1
+sub_type/p_h1n1_all_years_500_np.fasta,sub_type/p_h3n2_all_years_500_np.fasta,subtype h1n1 vs h3n2,np
+
+pH1N1/p_pH1N1_ha_500.fasta,pH1N1/p_not_pH1N1_ha_500.fasta,pH1N1_similarity,ha
+pH1N1/p_pH1N1_na_500.fasta,pH1N1/p_not_pH1N1_na_500.fasta,pH1N1_similarity,na
+pH1N1/p_pH1N1_m1_500.fasta,pH1N1/p_not_pH1N1_m1_500.fasta,pH1N1_similarity,m1
+pH1N1/p_pH1N1_pb1_500.fasta,pH1N1/p_not_pH1N1_pb1_500.fasta,pH1N1_similarity,pb1
+
+drug_resistance/p_ad_resistant_ha_232.fasta,drug_resistance/p_ad_sensitive_ha_228.fasta,ad_drug_resistance,ha
+drug_resistance/p_ad_resistant_m2_49.fasta,drug_resistance/p_ad_sensitive_m2_28.fasta,ad_drug_resistance,m2
+
+drug_resistance/p_os_resistant_ha_189.fasta,drug_resistance/p_os_sensitive_ha_271.fasta,os_drug_resistance,ha
+drug_resistance/p_os_resistant_na_98.fasta,drug_resistance/p_os_sensitive_na_203.fasta,os_drug_resistance,na
+
+drug_resistance/p_ad_res_os_sen_180_na.fasta,drug_resistance/p_os_res_ad_sen_90_na.fasta,ad_os_drug_resistance,na
+drug_resistance/p_ad_res_os_sen_220_ha.fasta,drug_resistance/p_os_res_ad_sen_180_ha.fasta,ad_os_drug_resistance,ha
+drug_resistance/p_ad_res_os_sen_47_m2.fasta,drug_resistance/p_os_res_ad_sen_18_m2.fasta,ad_os_drug_resistance,m2
+drug_resistance/p_ad_res_os_sen_27_m1.fasta,drug_resistance/p_os_res_ad_sen_16_m1.fasta,ad_os_drug_resistance,m1
+
+location/p_asia_2011to2013_h1n1_na_452.fasta,location/p_northamerica_h1n1_2011to2013_na_500.fasta,location(asia-north america),na
+location/p_asia_h1n1_2011to2013_ha_571.fasta,location/p_northamerica_h1n1_2011to2013_ha_500.fasta,location(asia-north america),ha
+location/p_asia_h1n1_2011to2013_np_114.fasta,location/p_northamerica_h1n1_2011to2013_np_200.fasta,location(asia-north america),np
+
