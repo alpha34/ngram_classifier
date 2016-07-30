@@ -22,7 +22,7 @@ from sklearn.metrics import roc_curve, auc
 from difflib import SequenceMatcher
 import csv
 
-allkeys=[]
+threegrams=[]
 
 #use biopython SeqIO to parse fasta file
 #returns a list of sequences
@@ -60,7 +60,7 @@ def create_keys(n):
     return keys2
 
 def get_key(position):
-    return allkeys[position]
+    return threegrams[position]
     
 #to check if an ngram contains other than 'ACGT' characters, ngram = set1, 'ACGT' = str1
 def contains_other_than(str1, set1):
@@ -70,7 +70,7 @@ def contains_other_than(str1, set1):
 def calculate_ngram_frequencies(n, sequence):
     freq_vector = {}
     #initialize all frequencies to zero
-    for key in allkeys:
+    for key in threegrams:
         freq_vector[key]=0
         
     #compute normalized frequencies using standardized min-max normalization
@@ -129,7 +129,7 @@ def test(model, data, labels, test_size, data_type, method, color):
         print("Feature ranking:")
         for f in range(10):
             index=indices[f]
-            print("%d. feature %d %s (%f)" % (f + 1, indices[f], allkeys[index], importances[indices[f]]))
+            print("%d. feature %d %s (%f)" % (f + 1, indices[f], threegrams[index], importances[indices[f]]))
     roc(predicted_labels, test_labels, data_type,method, color)
     
 def cross_validate(rfc,data,labels):
@@ -196,12 +196,23 @@ def save_plot(plt, directory, file, ext='png'):
     # Actually save the figure
     plt.savefig(savepath)
     plt.close()
-    
+
+def create_same_size_sequences(sequences1, sequences2):
+    len1=len(sequences1)
+    len2=len(sequences2)
+    if (len1<len2):
+        sequences2=sequences2[:len1]
+    if (len1>len2):
+        sequences1=sequences1[:len2]
+    return sequences1, sequences2
+        
+
 def create_data(sequences1, sequences2):
     print("size of data before duplicate check", len(sequences1), len(sequences2))
     sequences1 = remove_duplicates(sequences1)
     sequences2 = remove_duplicates(sequences2)
-    print("size of data after duplicate check", len(sequences1), len(sequences2))
+    sequences1, sequences2 = create_same_size_sequences(sequences1, sequences2)
+    print("size of data after duplicate check and same sizing", len(sequences1), len(sequences2))
     #seqs1 = remove_similar_sequences(sequences1)
     #seqs2 = remove_similar_sequences(sequences2)
     #print("size of data after similarity check", len(seqs2))
@@ -242,9 +253,10 @@ def readFile(filename):
 #pipeline
 if __name__ == '__main__':
     input_file = sys.argv[1]
-    sys.stdout = open("C:\\uday\\gmu\\ngrams\\jan_2016_results\\ngrams_results.txt", "w")
+    output_filename = sys.argv[2]
+    sys.stdout = open(output_filename, "w")
     lines = readFile(input_file)
-    allkeys=create_keys(3)
+    threegrams=create_keys(3)
     for line in lines:
         print("----------------------------------")
         print("start processing ",line[2])
