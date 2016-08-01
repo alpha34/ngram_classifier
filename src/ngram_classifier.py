@@ -5,54 +5,20 @@ classifies data using random forest & svm after computing ngram frequency vector
 input=fasta files of dna sequences
 '''
 
-import os
 import sys
 from Bio import SeqIO
 from itertools import product
 from numpy import array, ones, zeros, concatenate, argsort
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.cross_validation import cross_val_score, train_test_split
-from sklearn import metrics
 from sklearn.svm import SVC
-from sklearn.metrics import roc_curve, auc
-from difflib import SequenceMatcher
 import csv
+import ngram_classifier_util as util
+from sortedcontainers import SortedDict
 
 threegrams=[]
-
-#use biopython SeqIO to parse fasta file
-#returns a list of sequences
-def get_sequences(fasta_file):
-    sequences = [x.seq for x in SeqIO.parse(fasta_file, "fasta")]
-    return sequences
-
-def remove_duplicates(sequences):
-    unique_seqs = set()
-    for sequence in sequences:
-        if sequence not in unique_seqs:
-            unique_seqs.add(sequence)
-    return list(unique_seqs)
-
-#remove >95% identical sequences
-def remove_similar_sequences(sequences):
-    unique_sequences = []
-    unique_sequences.append(sequences[0])
-
-    for sequence in sequences[1:]:
-        similar = False
-        for unique_sequence in unique_sequences:
-            similarity = SequenceMatcher(None, sequence, unique_sequence).ratio()
-            if similarity>0.95:
-                print("similarity ", similarity)
-                similar = True
-                break
-        if similar==False:
-            unique_sequences.append(sequence)
-    return unique_sequences
 
 def create_keys(n):
     keys = list(product(['A','C','G','T'],repeat=n))
@@ -87,7 +53,7 @@ def calculate_ngram_frequencies(n, sequence):
     for key, value in freq_vector.items():
         freq_vector[key]=(float(value)-float(min_freq))/(max_freq-min_freq)
 
-    return freq_vector
+    return SortedDict(freq_vector)
 
 def compute_frequency_matrix(n, sequences):
     matrix=[]
@@ -104,7 +70,7 @@ def random_forest(data, labels, n_estimators):
     return rfc
 
 def perform_svm(data, labels, C):
-    svm = SVC(kernel='linear', C=C)
+    svm = SVC(kernel='linear', C=C,probability=True)
     return svm
 
 def perform_knn():
@@ -130,92 +96,48 @@ def test(model, data, labels, test_size, data_type, method, color):
         for f in range(10):
             index=indices[f]
             print("%d. feature %d %s (%f)" % (f + 1, indices[f], threegrams[index], importances[indices[f]]))
-    roc(predicted_labels, test_labels, data_type,method, color)
     
-def cross_validate(rfc,data,labels):
-    scores = cross_val_score(rfc,data,labels,cv=10,verbose=0)
-    print("Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std()))    
+def cross_validate(model,data,labels):
+    scores = cross_val_score(model, data, labels, cv=10, verbose=0)
+    accuracy = float("{0:.2f}".format(scores.mean()))
+    print("Accuracy: ", accuracy)
+    return accuracy   
 
 def predict(model, test_data):
-    predictions=model.predict(test_data)
-    return predictions
+    predictions = model.predict_proba(test_data)
+    print(predictions.shape)
+    return predictions[:,1]
 
-def roc(y_pred, y, data_type, method, color):
-    false_positive_rate, true_positive_rate, thresholds = roc_curve(y, y_pred)
-    roc_auc = auc(false_positive_rate, true_positive_rate)
-    plt.plot(false_positive_rate,true_positive_rate,'b',color=color, label='auc for %s=%0.2f' %(method,roc_auc))
-
-def start_plot(data_type):
-    plt.title('roc for %s' %data_type)
-    plt.plot([0,1], [0,1], 'r--',color='black')
-    plt.xlim([-0.1, 1.2])
-    plt.ylim([-0.1, 1.2])
-    plt.ylabel('true positives')
-    plt.xlabel('false positives')    
-
-def plot_confusion_matrix(y_pred, y, data_type, method):
-    plt.imshow(metrics.confusion_matrix(y, y_pred),cmap=cm.get_cmap('summer'),interpolation='nearest')
-    plt.colorbar()
-    plt.xlabel('true value')
-    plt.ylabel('predicted value')
-    plt.title('confusion matrix for %s using %s' %(data_type, method), y=1.05)
-    plt.show()
-
-def run(data, labels, data_type):
-    start_plot(data_type)
+def run(data, labels, data_type, plots_folder='C:\\uday\\gmu\\ngrams\\july_2016_results\\'):
+    if ('shuffle' in data_type):
+        colors = ['red', 'lightsalmon', 'indianred', 'lightcoral']
+    else:
+        colors = ['chartreuse', 'forestgreen', 'green', 'olivedrab']
+        
     print("results from RF")
-    rfc=random_forest(data, labels, 50)
-    test(rfc,data,labels,0.33,data_type,'Random Forests','red')
-    cross_validate(rfc,data,labels)
+    rfc = random_forest(data, labels, 50)
+    test(rfc, data, labels, 0.33, data_type, 'Random Forests', colors[0])
+    rfc_accuracy = cross_validate(rfc, data, labels)
     print("results from SVM")
     this_svm = perform_svm(data, labels, 1)
-    test(this_svm,data,labels,0.2,data_type,'SVM','green')
-    cross_validate(this_svm,data,labels)
+    test(this_svm, data, labels, 0.33, data_type, 'SVM', colors[1])
+    svm_accuracy = cross_validate(this_svm, data, labels)
     print("results from KNN")
     knn = perform_knn()
-    test(knn,data,labels,0.2,data_type,'KNN','blue')
-    cross_validate(knn,data,labels)
+    test(knn, data, labels, 0.33, data_type, 'KNN', colors[2])
+    knn_accuracy = cross_validate(knn, data, labels)
     print("results from Gaussian Naive Bayes")
     nb = perform_naive_bayes()
-    test(nb,data,labels,0.2,data_type,'Naive Bayes','lavender')
-    cross_validate(nb,data,labels)
+    test(nb, data, labels, 0.33, data_type, 'Naive Bayes', colors[3])
+    nb_accuracy = cross_validate(nb, data, labels)
     
-    plt.legend(loc='lower right')
-    #plt.show()
-    save_plot(plt, 'C:\\uday\\gmu\\ngrams\\jan_2016_results\\', data_type)
-
-def save_plot(plt, directory, file, ext='png'):
-    # If the directory does not exist, create it
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-    filename = "%s.%s" % (file, ext)
-    # The final path to save to
-    savepath = os.path.join(directory, file)
-    print("Saving figure to '%s'..." % savepath),
-
-    # Actually save the figure
-    plt.savefig(savepath)
-    plt.close()
-
-def create_same_size_sequences(sequences1, sequences2):
-    len1=len(sequences1)
-    len2=len(sequences2)
-    if (len1<len2):
-        sequences2=sequences2[:len1]
-    if (len1>len2):
-        sequences1=sequences1[:len2]
-    return sequences1, sequences2
-        
+    accuracies = [rfc_accuracy, svm_accuracy, knn_accuracy, nb_accuracy]
+    return accuracies 
 
 def create_data(sequences1, sequences2):
-    print("size of data before duplicate check", len(sequences1), len(sequences2))
-    sequences1 = remove_duplicates(sequences1)
-    sequences2 = remove_duplicates(sequences2)
-    sequences1, sequences2 = create_same_size_sequences(sequences1, sequences2)
-    print("size of data after duplicate check and same sizing", len(sequences1), len(sequences2))
-    #seqs1 = remove_similar_sequences(sequences1)
-    #seqs2 = remove_similar_sequences(sequences2)
-    #print("size of data after similarity check", len(seqs2))
+    print("size of data before same sizing", len(sequences1), len(sequences2))
+    sequences1, sequences2 = util.create_same_size_sequences(sequences1, sequences2)
+    print("size of data after same sizing", len(sequences1), len(sequences2))
     matrix1 = compute_frequency_matrix(3, sequences1)
     matrix2 = compute_frequency_matrix(3, sequences2)
     len1 = len(matrix1)
@@ -227,8 +149,8 @@ def create_data(sequences1, sequences2):
     return data, labels
     
 def get_data_from_files(file1, file2):
-    sequences1 = get_sequences(file1)
-    sequences2 = get_sequences(file2)
+    sequences1 = util.get_sequences(file1)
+    sequences2 = util.get_sequences(file2)
     data, labels = create_data(sequences1, sequences2)
     return data, labels    
 
@@ -253,22 +175,40 @@ def readFile(filename):
 #pipeline
 if __name__ == '__main__':
     input_file = sys.argv[1]
-    output_filename = sys.argv[2]
-    sys.stdout = open(output_filename, "w")
-    lines = readFile(input_file)
-    threegrams=create_keys(3)
+    output_dir = sys.argv[2]
+    util.remove_old_output_files(output_dir)
+    sys.stdout = open(util.generate_output_filename(output_dir, basename='dna_results'), "w")
+    lines = util.readFile(input_file)
+    threegrams = create_keys(3)
+    proteins = []
+    accuracies = []
+    
     for line in lines:
-        print("----------------------------------")
-        print("start processing ",line[2])
-        file1=line[0]
-        file2=line[1]
-        analysis_type=line[2]
-        if (file1.find("_m_")>0):
-            data1, labels1, data2, labels2 = get_m1_m2_data_from_files(file1, file2)
-            run(data1,labels1,analysis_type.replace("m", "m1"))
-            run(data2,labels2,analysis_type.replace("m", "m2"))
-        else:            
-            data, labels = get_data_from_files(file1, file2)
-            run(data,labels,analysis_type)
-        print("done processing ",line[2])
-        print("----------------------------------")
+        if line:
+            print("-----------------------------------------")
+            print(line[0], line[1], line[2], line[3])
+            print("start processing ", line[2], line[3])
+            file1 = line[0]
+            file2 = line[1]
+            analysis_type = line[2]
+            protein = line[3]
+
+            if (file1.find("_m_")>0):
+                data1, labels1, data2, labels2 = get_m1_m2_data_from_files(file1, file2)
+                accuracy=run(data1,labels1,analysis_type+'-M1')
+                accuracies.append(accuracy)
+                proteins.append('M1')
+                accuracy=run(data2,labels2,analysis_type+'-M2')
+                accuracies.append(accuracy)
+                proteins.append('M2')
+            else:            
+                data, labels = get_data_from_files(file1, file2)
+                accuracy=run(data, labels, analysis_type + '-' + protein)
+                accuracies.append(accuracy)
+                proteins.append(protein)
+        else:
+            util.plot_accuracies(accuracies, proteins, analysis_type, output_dir)
+            proteins = []
+            accuracies = []
+            print("\n\n")
+        
