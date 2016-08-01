@@ -200,7 +200,7 @@ if __name__ == '__main__':
             proteins.append(protein)
             print("&&& &&& &&& &&& &&& &&& &&& &&& &&&")
             accuracy = run(util.shuffle_data(data), labels, analysis_type + '-' + protein + '_shuffle')
-            util.save_plot(output_dir, analysis_type + '-' + protein, 'svg', 1200)
+            util.save_plot(output_dir, analysis_type + '-' + protein, 'svg', 600)
             print("done processing ", line[2], line[3])
         else:
             util.plot_accuracies(accuracies, proteins, analysis_type, output_dir)

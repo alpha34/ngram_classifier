@@ -11,11 +11,11 @@ from bokeh.charts import Bar, output_file, show
 from sklearn.metrics import roc_curve, auc
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
-from numpy import arange, linspace
+from numpy import arange
 from Bio.SeqUtils import ProtParam
 from sortedcontainers import SortedDict
 from sys import argv
-from scipy.interpolate import spline
+from PIL import Image
 
 #use biopython SeqIO to parse fasta file
 #returns a list of sequences
@@ -177,12 +177,12 @@ def start_roc_plot(data_type):
     plt.style.use(['seaborn-white', 'seaborn-paper'])
     matplotlib.rc("font", family="Times New Roman")
     plt.figure()
-    plt.title('roc for %s' % data_type, fontsize=24)
+    plt.title('ROC FOR %s' % data_type, fontsize=20)
     plt.plot([0, 1], [0, 1], 'k--', color='black')
     plt.xlim([0.0, 1.0])
     plt.ylim([0.0, 1.05])
-    plt.ylabel('true positive rate', fontsize=24)
-    plt.xlabel('false positive rate', fontsize=24)
+    plt.ylabel('TRUE POSITIVE RATE', fontsize=16)
+    plt.xlabel('FALSE POSITIVE RATE', fontsize=16)
     plt.tick_params(axis='y', labelsize=20)
     plt.tick_params(axis='x', labelsize=20)    
 
@@ -210,13 +210,13 @@ def plot_accuracies(accuracies, proteins, title, directory):
     patterns    = ['-', 'x', 'o', '/']
     
     for index in range(len(accuracies)):
-        ax.bar(x + bar_width * index, accuracies[index], bar_width, color='grey', edgecolor='black', alpha=0.7, hatch=patterns[index], label=proteins[index])
+        ax.bar(x + bar_width * index, accuracies[index], bar_width, color='Grey', edgecolor='black', alpha=0.7, hatch=patterns[index], label=proteins[index])
     
     ax.set_xticks(x + (bar_width*len(proteins)/2))
     ax.set_xticklabels(['RF', 'SVM', 'KNN', 'GNB'], fontsize=20)
-    ax.set_title(title, fontsize=24)
+    ax.set_title(title, fontsize=20)
     ax.set_ylim(0.0, 1.0)
-    ax.set_ylabel('classification accuracy', fontsize=24)
+    ax.set_ylabel('CLASSIFICATION ACCURACY', fontsize=16)
     ax.tick_params(axis='y', labelsize=20)
     ax.legend(bbox_to_anchor=(1.01, 0.5),loc=2,borderaxespad=0.,fontsize=20)
     
@@ -225,11 +225,10 @@ def plot_accuracies(accuracies, proteins, title, directory):
     filename = "%s.%s" % (title, 'svg')
     savepath = os.path.join(directory, filename)
     print("Saving figure to '%s'..." % savepath)
-    fig.set_size_inches(8, 6)
 
     plt.margins(0.01, 0)
     plt.tight_layout()
-    plt.savefig(savepath, dpi=1200, format='svg')
+    plt.savefig(savepath, dpi=1200, figsize=(8, 6), format='svg')
     plt.close('all')
     
 def plot_accuracies_bokeh(accuracies, proteins, title, directory='C:\\uday\\gmu\\ngrams\\july_2016_results\\', ext='html'):
@@ -259,7 +258,7 @@ def save_plot(directory, file, ext, dpi):
     savepath = os.path.join(directory, filename)
     print("Saving figure to '%s'..." % savepath)
     figure = plt.gcf() # get current figure
-    figure.set_size_inches(8, 6)
+    figure.set_size_inches(8, 8)
     figure.tight_layout()
     figure.savefig(savepath, dpi=dpi, format=ext)
     plt.close('all')
